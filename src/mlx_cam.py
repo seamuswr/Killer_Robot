@@ -165,6 +165,36 @@ class MLX_Cam:
             time.sleep_ms(500)
             yield line
         return
+    
+    
+    ## @brief   Generate a an integer value for the location of the target.
+    #  @details This function takes the array image of heat values produced by the camera
+    #           and outputs the column with the max heat.
+    #  @param   array The array of data to be presented
+    #  @param   limits A 2-iterable containing the maximum and minimum values
+    #           to which the data should be scaled, or @c None for no scaling
+    def get_target(self, array, limits=None):
+        
+        if limits and len(limits) == 2:
+            scale = (99) / (max(array) - min(array))
+            offset = - min(array)
+        else:
+            offset = 0.0
+            scale = 1.0
+        
+        col_sum = 0
+        target_col = 0
+        max_sum = 0
+        for col in range(self._width):
+            for row in range(self._height):
+                col_sum += int((array[row * self._width + (self._width - col - 1)]
+                          + offset) * scale)
+            if col_sum > max_sum:
+                max_sum = col_sum
+                target_col = col
+            col_sum = 0
+        return target_col
+    
 
 
     ## @brief   Get one image from a MLX90640 camera, @b blocking other tasks
