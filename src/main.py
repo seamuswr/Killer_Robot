@@ -30,45 +30,69 @@ from mlx90640.image import ChessPattern, InterleavedPattern
 
 def task1_fun(shares):
     """!
-    Task which puts things into a share and a queue.
+    Task which operates the panning motor
     @param shares A list holding the share and queue used by this task
     """
     # Get references to the share and queue which have been passed to this task
-#     enc1 = encoder_reader.Encoder(pyb.Pin.board.PC6, pyb.Pin.board.PC7, pyb.Timer(8, prescaler=0, period=65535))
-#     moe1 = MotorDriver.MotorDriver(pyb.Pin.board.PC1, pyb.Pin.board.PA0, pyb.Pin.board.PA1, pyb.Timer(5, freq=20000))
-#     moe1.set_duty_cycle(0)
-#     enc1.zero()
-#     close1 = closed_loop.ClosedLoop(0, .5)
-#     output1 = 0
-# 
-#     while(output1 != "End"):
-#         output1 = close1.run(1024, enc1.read())
-#         moe1.set_duty_cycle(output1)
-# 
-#         yield 0
-#     close1.print_values()
-#     doneShare1.put(1)
-#     while (doneShare2.get() != 1):
-#         yield 0
-#     print("Done")
+    enc1 = encoder_reader.Encoder(pyb.Pin.board.PC6, pyb.Pin.board.PC7, pyb.Timer(8, prescaler=0, period=65535))
+    moe1 = MotorDriver.MotorDriver(pyb.Pin.board.PC1, pyb.Pin.board.PA0, pyb.Pin.board.PA1, pyb.Timer(5, freq=20000))
+    moe1.set_duty_cycle(0)
+    enc1.zero()
+    close1 = closed_loop.ClosedLoop(0, .5)
+    output1 = 0
+
+    while(output1 != "End"):
+        output1 = close1.run(512, enc1.read())
+        moe1.set_duty_cycle(output1)
+
+        yield 0
+    #close1.print_values()
+
+    while(ready_to_fire.get() != 1):
+        enc1.zero()
+        output1 = 0
+        target = target_share.get() - 17
+        while(output1 != "End"):
+            output1 = close1.run(target, enc1.read())
+            moe1.set_duty_cycle(output1)
+
+            yield 0
+    
+    while True:
+        yield
+
     
     the_share, the_queue = shares
 
-    while True:
-        # Show everything currently in the queue and the value in the share
+#     while True:
+#         # Show everything currently in the queue and the value in the share
 #         print(f"Share: {the_share.get ()}, Queue: ", end='')
 #         while q0.any():
 #             print(f"{the_queue.get ()} ", end='')
 #         print('')
-
-        yield 0
+# 
+#         yield 0
 
 def task2_fun(shares):
     """!
-    Task which takes things out of a queue and share and displays them.
+    Task which waits five seconds then fires
     @param shares A tuple of a share and queue from which this task gets data
     """
     # Get references to the share and queue which have been passed to this task
+    
+    start_time = time.ticks_ms()
+    
+    while(time.ticks_diff(time.ticks_ms(), begintime) < 5500):
+        yield
+    
+    ready_to_fire.put(1)
+    
+    while(time.ticks_diff(time.ticks_ms(), begintime) < 500):
+        yield
+    print(f"Fire")
+    
+    while True:
+        yield
 #     enc2 = encoder_reader.Encoder(pyb.Pin.board.PB6, pyb.Pin.board.PB7, pyb.Timer(4, prescaler=0, period=65535))
 #     moe2 = MotorDriver.MotorDriver(pyb.Pin.board.PA10, pyb.Pin.board.PB4, pyb.Pin.board.PB5, pyb.Timer(3, freq=20000))
 #     moe2.set_duty_cycle(0)
@@ -87,16 +111,16 @@ def task2_fun(shares):
 #         yield 0
 #     print("Done")
     
-    the_share, the_queue = shares
-#    doneShare2.put(1)
-    while True:
-        # Show everything currently in the queue and the value in the share
-#         print(f"Share: {the_share.get ()}, Queue: ", end='')
-#         while q0.any():
-#             print(f"{the_queue.get ()} ", end='')
-#         print('')
+#     the_share, the_queue = shares
+# #    doneShare2.put(1)
+#     while True:
+#         # Show everything currently in the queue and the value in the share
+# #         print(f"Share: {the_share.get ()}, Queue: ", end='')
+# #         while q0.any():
+# #             print(f"{the_queue.get ()} ", end='')
+# #         print('')
 
-        yield 0
+#         yield 0
 
 def task3_fun(shares):
     """!
@@ -116,7 +140,7 @@ def task3_fun(shares):
             yield 0
     
         target = camera.get_target(image, limits=(0, 99))
-        print(f"Target {target} ")
+        target_share.put(target)
         yield 0
     
 
@@ -135,7 +159,8 @@ if __name__ == "__main__":
     doneShare2 = task_share.Share('B', thread_protect=False, name="Done Share 2")
     doneShare1.put(0)
     doneShare2.put(0)
-    target_ = task_share.Share('B', thread_protect=False, name="Done Share 2")
+    target_share = task_share.Share('B', thread_protect=False, name="Target")
+    ready_to_fire = task_share.Share('B', thread_protect=False, name="Ready to fire")
     # Create the tasks. If trace is enabled for any task, memory will be
     # allocated for state transition tracing, and the application will run out
     # of memory after a while and quit. Therefore, use tracing only for 
@@ -144,7 +169,7 @@ if __name__ == "__main__":
                         profile=True, trace=False, shares=(share0, q0))
     task2 = cotask.Task(task2_fun, name="Task_2", priority=2, period=70,
                         profile=True, trace=False, shares=(share0, q0))
-    task3 = cotask.Task(task3_fun, name="Task_3", priority=3, period=50,
+    task3 = cotask.Task(task3_fun, name="Task_3", priority=3, period=120,
                         profile=True, trace=False, shares=(share0, q0))
     cotask.task_list.append(task1)
     cotask.task_list.append(task2)
