@@ -18,7 +18,7 @@ class ClosedLoop:
     This class implements a closed-loop control system with proportional control.
     """
 
-    def __init__(self, setpoint, Kp):
+    def __init__(self, setpoint, Kp, Ki):
         """!
         Initializes the ClosedLoop object with setpoint and proportional gain.
 
@@ -27,9 +27,12 @@ class ClosedLoop:
         """
         self.setpoint = setpoint
         self.Kp = Kp
+        self.Ki = Ki
+        self.i_integral = 0
         self.measured_output = 0
-        self.time_queue = cqueue.IntQueue(15)
-        self.pos_queue = cqueue.IntQueue(15)
+        self.prev_time = 0
+        self.time_queue = cqueue.IntQueue(20)
+        self.pos_queue = cqueue.IntQueue(20)
         self.start_time = utime.ticks_ms()
 
     def run(self, setpoint, measured_output):
@@ -48,7 +51,9 @@ class ClosedLoop:
         self.setpoint = setpoint
         self.measured_output = measured_output
         error = self.measured_output - self.setpoint
-        actuation_value = self.Kp * error       
+        self.i_integral += error*(utime.ticks_ms() - self.prev_time)/1000
+        self.prev_time = utime.ticks_ms()
+        actuation_value = int(self.Kp * error + self.Ki * self.i_integral)     
         if not self.time_queue.full():
             self.time_queue.put(utime.ticks_ms() - self.start_time)
             self.pos_queue.put(self.measured_output)
@@ -97,13 +102,14 @@ if __name__ == '__main__':
     enc2.zero()
     
     # Initialize closed-loop control object
-    close1 = ClosedLoop(0, .5)
-    close2 = ClosedLoop(0, .5)
-
+    close1 = ClosedLoop(0, .3, .01)
+    close2 = ClosedLoop(0, 1, 0)
+    #utime.sleep(2)
     # Main control loop
     while True:
-        output1 = close1.run(1000, enc1.read())
-        moe1.set_duty_cycle(output1)
-        output2 = close2.run(2000, enc2.read())
+        
+        #output1 = close1.run(2340, enc1.read())
+        #moe1.set_duty_cycle(output1)
+        output2 = close2.run(550, enc2.read())
         moe2.set_duty_cycle(output2)
         utime.sleep(.1)

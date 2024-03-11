@@ -36,6 +36,7 @@ def task1_fun(shares):
     # Get references to the share and queue which have been passed to this task
     enc1 = encoder_reader.Encoder(pyb.Pin.board.PC6, pyb.Pin.board.PC7, pyb.Timer(8, prescaler=0, period=65535))
     moe1 = MotorDriver.MotorDriver(pyb.Pin.board.PC1, pyb.Pin.board.PA0, pyb.Pin.board.PA1, pyb.Timer(5, freq=20000))
+    #C6 is yellow, C7 is blue, orange and green in B
     moe1.set_duty_cycle(0)
     enc1.zero()
     close1 = closed_loop.ClosedLoop(0, .5)
@@ -95,6 +96,7 @@ def task2_fun(shares):
         yield
 #     enc2 = encoder_reader.Encoder(pyb.Pin.board.PB6, pyb.Pin.board.PB7, pyb.Timer(4, prescaler=0, period=65535))
 #     moe2 = MotorDriver.MotorDriver(pyb.Pin.board.PA10, pyb.Pin.board.PB4, pyb.Pin.board.PB5, pyb.Timer(3, freq=20000))
+#     #B7 is yellow, B6 is blue, orange and green in A
 #     moe2.set_duty_cycle(0)
 #     enc2.zero()
 #     close2 = closed_loop.ClosedLoop(0, .5)
