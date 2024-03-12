@@ -39,26 +39,34 @@ def task1_fun(shares):
     #C6 is yellow, C7 is blue, orange and green in B
     moe1.set_duty_cycle(0)
     enc1.zero()
-    close1 = closed_loop.ClosedLoop(0, .5)
+    close1 = closed_loop.ClosedLoop(0, .4, 0)
     output1 = 0
 
     while(output1 != "End"):
-        output1 = close1.run(512, enc1.read())
+        output1 = close1.run(-830, enc1.read())
         moe1.set_duty_cycle(output1)
 
         yield 0
     #close1.print_values()
+        
+#     start_time = time.ticks_ms()
+#     
+#     while(time.ticks_diff(time.ticks_ms(), start_time) < 5500):
+#         yield
+        
+    while(picture_ready.get() != 1):
+        yield
+    enc1.zero()
+    output1 = 0
+    close2 = closed_loop.ClosedLoop(0, .7, 0)
+    target = target_share.get() - 17
+    while(output1 != "End"):
+        output1 = close2.run(8*target, enc1.read())
+        moe1.set_duty_cycle(output1)
 
-    while(ready_to_fire.get() != 1):
-        enc1.zero()
-        output1 = 0
-        target = target_share.get() - 17
-        while(output1 != "End"):
-            output1 = close1.run(target, enc1.read())
-            moe1.set_duty_cycle(output1)
-
-            yield 0
+        yield 0
     
+    ready_to_fire.put(1)
     while True:
         yield
 
@@ -81,32 +89,25 @@ def task2_fun(shares):
     """
     # Get references to the share and queue which have been passed to this task
     
-    start_time = time.ticks_ms()
-    
-    while(time.ticks_diff(time.ticks_ms(), begintime) < 5500):
+    enc2 = encoder_reader.Encoder(pyb.Pin.board.PB6, pyb.Pin.board.PB7, pyb.Timer(4, prescaler=0, period=65535))
+    moe2 = MotorDriver.MotorDriver(pyb.Pin.board.PA10, pyb.Pin.board.PB4, pyb.Pin.board.PB5, pyb.Timer(3, freq=20000))
+    #B7 is yellow, B6 is blue, orange and green in A
+    moe2.set_duty_cycle(0)
+      
+    while(ready_to_fire.get() != 1):
         yield
     
-    ready_to_fire.put(1)
-    
-    while(time.ticks_diff(time.ticks_ms(), begintime) < 500):
-        yield
-    print(f"Fire")
-    
+    enc2.zero()
+    close2 = closed_loop.ClosedLoop(0, .8, 0)
+    output2 = 0
+
+    while(output2 != "End"):
+        output2 = close2.run(-100, enc2.read())
+        moe2.set_duty_cycle(output2)
+        
+        yield 0
     while True:
         yield
-#     enc2 = encoder_reader.Encoder(pyb.Pin.board.PB6, pyb.Pin.board.PB7, pyb.Timer(4, prescaler=0, period=65535))
-#     moe2 = MotorDriver.MotorDriver(pyb.Pin.board.PA10, pyb.Pin.board.PB4, pyb.Pin.board.PB5, pyb.Timer(3, freq=20000))
-#     #B7 is yellow, B6 is blue, orange and green in A
-#     moe2.set_duty_cycle(0)
-#     enc2.zero()
-#     close2 = closed_loop.ClosedLoop(0, .5)
-#     output2 = 0
-# 
-#     while(output2 != "End"):
-#         output2 = close2.run(2048, enc2.read())
-#         moe2.set_duty_cycle(output2)
-#         
-#         yield 0
 #     close2.print_values()
 #     doneShare2.put(1)
 #     while (doneShare1.get() != 1):
@@ -135,15 +136,21 @@ def task3_fun(shares):
     camera = mlx_cam.MLX_Cam(i2c_bus)
     camera._camera.refresh_rate = 10.0
     
-    while True:
-        image = None
-        while not image:
-            image = camera.get_image_nonblocking()
-            yield 0
+    start_time = time.ticks_ms()
     
-        target = camera.get_target(image, limits=(0, 99))
-        target_share.put(target)
+    while(time.ticks_diff(time.ticks_ms(), start_time) < 5000):
+        yield
+        
+    image = None
+    while not image:
+        image = camera.get_image_nonblocking()
         yield 0
+    
+    target = camera.get_target(image, limits=(0, 99))
+    target_share.put(target)
+    picture_ready.put(1)
+    while True:
+        yield 
     
 
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
@@ -163,6 +170,10 @@ if __name__ == "__main__":
     doneShare2.put(0)
     target_share = task_share.Share('B', thread_protect=False, name="Target")
     ready_to_fire = task_share.Share('B', thread_protect=False, name="Ready to fire")
+    picture_ready = task_share.Share('B', thread_protect=False, name="Picture ready")
+    target_share.put(0)
+    ready_to_fire.put(0)
+    picture_ready.put(0)
     # Create the tasks. If trace is enabled for any task, memory will be
     # allocated for state transition tracing, and the application will run out
     # of memory after a while and quit. Therefore, use tracing only for 
@@ -171,7 +182,7 @@ if __name__ == "__main__":
                         profile=True, trace=False, shares=(share0, q0))
     task2 = cotask.Task(task2_fun, name="Task_2", priority=2, period=70,
                         profile=True, trace=False, shares=(share0, q0))
-    task3 = cotask.Task(task3_fun, name="Task_3", priority=3, period=120,
+    task3 = cotask.Task(task3_fun, name="Task_3", priority=3, period=180,
                         profile=True, trace=False, shares=(share0, q0))
     cotask.task_list.append(task1)
     cotask.task_list.append(task2)

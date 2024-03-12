@@ -31,8 +31,8 @@ class ClosedLoop:
         self.i_integral = 0
         self.measured_output = 0
         self.prev_time = 0
-        self.time_queue = cqueue.IntQueue(20)
-        self.pos_queue = cqueue.IntQueue(20)
+        self.time_queue = cqueue.IntQueue(30)
+        self.pos_queue = cqueue.IntQueue(30)
         self.start_time = utime.ticks_ms()
 
     def run(self, setpoint, measured_output):
@@ -51,7 +51,7 @@ class ClosedLoop:
         self.setpoint = setpoint
         self.measured_output = measured_output
         error = self.measured_output - self.setpoint
-        self.i_integral += error*(utime.ticks_ms() - self.prev_time)/1000
+        self.i_integral += error*(utime.ticks_ms() - self.prev_time)/100
         self.prev_time = utime.ticks_ms()
         actuation_value = int(self.Kp * error + self.Ki * self.i_integral)     
         if not self.time_queue.full():
@@ -102,14 +102,14 @@ if __name__ == '__main__':
     enc2.zero()
     
     # Initialize closed-loop control object
-    close1 = ClosedLoop(0, .3, .01)
-    close2 = ClosedLoop(0, 1, 0)
-    #utime.sleep(2)
+    close1 = ClosedLoop(0, .2, 0)
+    close2 = ClosedLoop(0, .8, 0)
+    #utime.sleep(1)
     # Main control loop
     while True:
         
-        #output1 = close1.run(2340, enc1.read())
+        #output1 = close1.run(-800, enc1.read())
         #moe1.set_duty_cycle(output1)
-        output2 = close2.run(550, enc2.read())
+        output2 = close2.run(-100, enc2.read())
         moe2.set_duty_cycle(output2)
         utime.sleep(.1)
