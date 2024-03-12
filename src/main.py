@@ -43,7 +43,7 @@ def task1_fun(shares):
     output1 = 0
 
     while(output1 != "End"):
-        output1 = close1.run(-830, enc1.read())
+        output1 = close1.run(-850, enc1.read())
         moe1.set_duty_cycle(output1)
 
         yield 0
@@ -58,10 +58,14 @@ def task1_fun(shares):
         yield
     enc1.zero()
     output1 = 0
-    close2 = closed_loop.ClosedLoop(0, .7, 0)
-    target = target_share.get() - 17
+    target = target_share.get() - 19
+    if target < 20:
+        close2 = closed_loop.ClosedLoop(0, 1.2, 0)
+    else:
+        close2 = closed_loop.ClosedLoop(0, .5, 0)
+        
     while(output1 != "End"):
-        output1 = close2.run(8*target, enc1.read())
+        output1 = close2.run(6*target, enc1.read())
         moe1.set_duty_cycle(output1)
 
         yield 0
@@ -106,8 +110,7 @@ def task2_fun(shares):
         moe2.set_duty_cycle(output2)
         
         yield 0
-    while True:
-        yield
+
 #     close2.print_values()
 #     doneShare2.put(1)
 #     while (doneShare1.get() != 1):
@@ -138,7 +141,7 @@ def task3_fun(shares):
     
     start_time = time.ticks_ms()
     
-    while(time.ticks_diff(time.ticks_ms(), start_time) < 5000):
+    while(time.ticks_diff(time.ticks_ms(), start_time) < 3500):
         yield
         
     image = None

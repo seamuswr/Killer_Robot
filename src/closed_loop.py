@@ -102,14 +102,14 @@ if __name__ == '__main__':
     enc2.zero()
     
     # Initialize closed-loop control object
-    close1 = ClosedLoop(0, .2, 0)
+    close1 = ClosedLoop(0, .7, 0)
     close2 = ClosedLoop(0, .8, 0)
     #utime.sleep(1)
     # Main control loop
     while True:
         
-        #output1 = close1.run(-800, enc1.read())
-        #moe1.set_duty_cycle(output1)
-        output2 = close2.run(-100, enc2.read())
-        moe2.set_duty_cycle(output2)
+        output1 = close1.run(-50, enc1.read())
+        moe1.set_duty_cycle(output1)
+        #output2 = close2.run(-100, enc2.read())
+        #moe2.set_duty_cycle(output2)
         utime.sleep(.1)
