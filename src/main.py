@@ -26,6 +26,7 @@ from machine import Pin, I2C
 from mlx90640 import MLX90640
 from mlx90640.calibration import NUM_ROWS, NUM_COLS, IMAGE_SIZE, TEMP_K
 from mlx90640.image import ChessPattern, InterleavedPattern
+import set_kp
 
 
 def task1_fun(shares):
@@ -39,11 +40,11 @@ def task1_fun(shares):
     #C6 is yellow, C7 is blue, orange and green in B
     moe1.set_duty_cycle(0)
     enc1.zero()
-    close1 = closed_loop.ClosedLoop(0, .4, 0)
+    close1 = closed_loop.ClosedLoop(0, .111, 0)
     output1 = 0
 
     while(output1 != "End"):
-        output1 = close1.run(-850, enc1.read())
+        output1 = close1.run(-800, enc1.read())
         moe1.set_duty_cycle(output1)
 
         yield 0
@@ -58,11 +59,19 @@ def task1_fun(shares):
         yield
     enc1.zero()
     output1 = 0
-    target = target_share.get() - 19
-    if target < 20:
-        close2 = closed_loop.ClosedLoop(0, 1.2, 0)
+    target = target_share.get() - 21
+    
+    # KP_calculation
+    slope = 0.09
+    if abs(target) < 9:
+        a = -slope*target + 1.7
     else:
-        close2 = closed_loop.ClosedLoop(0, .5, 0)
+        a = 0.5
+    close2 = closed_loop.ClosedLoop(0, a, 0)
+#     if target < 20:
+#         close2 = closed_loop.ClosedLoop(0, set_kp(target), 0)
+#     else:
+#         close2 = closed_loop.ClosedLoop(0, .5, 0)
         
     while(output1 != "End"):
         output1 = close2.run(6*target, enc1.read())
@@ -207,4 +216,3 @@ if __name__ == "__main__":
     print(task_share.show_all())
     print(task1.get_trace())
     print('')
-
