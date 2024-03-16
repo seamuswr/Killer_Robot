@@ -1,4 +1,4 @@
-ME 405 Term Project - The Glue Boys
+ME 405 Term Project - The Glue Boys -
 Autonomous Nerf Launcher with Target Lock On
 
 Intro Purpose and Targeted Audience
