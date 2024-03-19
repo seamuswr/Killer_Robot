@@ -8,7 +8,12 @@ for a miss. With some refinement the device is best suited for keeping younger s
 
 The hardware for this project consisted of a strongarm nerf launcher attained from class, two brushed dc motors and 
 corresponding encoders, an Mlx90640 thermal camera, and an Nucleo-64 board with a motor driver and Shoe of Brian.
-All components were attached to a plywood base. Th
+The 3D printed parts of the robot consisted of a nerf gun clamp, a gear train with a 1:1.6 speed reduction, mounting 
+brackets for the motors, and a trigger. Components were attached to a plywood base. An emergency stop switch was wired
+into the main motor power lines. 
+
+<img width="1107" alt="Screenshot 2024-02-26 at 7 25 35 PM" src="https://github.com/seamuswr/Killer_Robot/assets/108034107/896ef53d-fcdc-4a2a-aefe-6c54da7810a9">
+CAD rendering of the 3D printed gun clamp
 
 
 Overview of the Software design
