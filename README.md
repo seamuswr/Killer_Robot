@@ -17,7 +17,7 @@ CAD rendering of the 3D printed gun clamp
 
 The software consisted of a main program with 3 tasks: Motor panning, trigger actuation, and thermal image capture. The tasks 
 work cooperatively to pan 180˚, wait 5 seconds, take a picture and calculate the hottest spot, pan to that spot, and fire.
-More documentation can be found here: file:///Users/seamus/Desktop/ME405/ME405_KillerRobot/docs/index.html
+More documentation can be found here: [file:///Users/seamus/Desktop/ME405/ME405_KillerRobot/docs/index.html](https://seamuswr.github.io/Killer_Robot/)
 
 The software was tested incrementally, first adjusting the controller gains and setpoint on the panning motor, then adding 
 the thermal camera and adjusting the panning response to the hottest column of the thermal image, then adjusting the trigger
