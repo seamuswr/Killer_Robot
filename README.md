@@ -15,6 +15,10 @@ into the main motor power lines.
 <img width="1107" alt="Screenshot 2024-02-26 at 7 25 35 PM" src="https://github.com/seamuswr/Killer_Robot/assets/108034107/896ef53d-fcdc-4a2a-aefe-6c54da7810a9">
 CAD rendering of the 3D printed gun clamp
 
+![animated](https://github.com/seamuswr/Killer_Robot/assets/156374208/edc229c7-f066-42ec-9124-5e7c0f067fca)
+
+CAD rendering of the full assembly
+
 ![unnamed (1)](https://github.com/seamuswr/Killer_Robot/assets/156267590/15f614eb-af48-45fa-b36b-1ccd79d0eb13)
 Physical Model of Our Automated Gun
 
