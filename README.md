@@ -42,10 +42,3 @@ it is less affected by noise at the edges of the image. The motor panning can be
 advanced control system than just proportinal control such as adding integral or derivative control. This can also be 
 improved by shedding weight on the robot and using a more powerful panning motor.
 
-
-
-Doxygen Main page
-
-- summary of the software
-- purpose of each files
-- discussion of tasks and states  (multitasking)
